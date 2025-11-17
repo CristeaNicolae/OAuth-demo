@@ -1,0 +1,1 @@
+export const state_cookie = "state_cookie";
