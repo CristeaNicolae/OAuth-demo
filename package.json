@@ -10,6 +10,7 @@
     "format": "biome format --write"
   },
   "dependencies": {
+    "google-auth-library": "^10.5.0",
     "iron-session": "^8.0.4",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.19.2",

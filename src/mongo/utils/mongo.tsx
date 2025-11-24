@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import UserModel from "@/mongo/models/User"
 
 declare global {
     var mongoose: any;
@@ -12,7 +13,7 @@ if (!cached) {
     cached = global.mongoose = { conn: null, promise: null };
 }
 
-async function dbConnect() {
+export async function dbConnect() {
 
     if (cached.conn) {
       return cached.conn;
@@ -35,4 +36,10 @@ async function dbConnect() {
     return cached.conn;
 }
 
-export default dbConnect;
+export async function findByEmail(email: string) {
+    return UserModel.findOne({email: email});
+}
+
+export async function createNewUser(email: string, password?: string, tokens?: string) {
+
+}

@@ -11,9 +11,10 @@ export default function LoggedHome() {
             Hello World
             <button 
             onClick={() => {
-                router.back();
+                router.push("/");
             }}
-            className="w-fit border hover: cursor-pointer hover:bg-white hover:text-black transition p-3 rounded">Go Back</button>
+            className="w-fit border hover: cursor-pointer hover:bg-white hover:text-black transition p-3 rounded">Sign Out
+            </button>
         </div>
     );
 }
