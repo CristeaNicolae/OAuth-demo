@@ -1,26 +1,23 @@
 import { NextRequest } from "next/server";
 import { NextResponse } from 'next/server'
-import { GoogleAuthToken } from "../types/auth"
-import * as jwt from "jsonwebtoken";
+import { app_cookie } from "@/utils/constants"
+import { checkToken, isExpired } from "@/utils/token";
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
 
-    // const tokenString = request.cookies.get("token")?.value;
+    const raw_token = request.cookies.get(app_cookie)?.value;
 
-    // if (!tokenString) {
-    //     return NextResponse.redirect(new URL("/", request.url));
-    // }
+    if (!raw_token) {
+        throw new Error("Could not find token");
+    }
 
-    // try{
-    //     const token = jwt.verify(tokenString, process.env.JWT_SECRET) as unknown as GoogleAuthToken;
-
-    //     console.log("email: " + token.email);
-
-    //     return NextResponse.next();
+    try {
+        if(!checkToken(raw_token)) throw new Error("Invalid Token");
+        return NextResponse.next();
         
-    // } catch(err) {
-    //     console.log("Invalid token" + err)
-    //     return NextResponse.redirect(new URL("/", request.url));
-    // }
+    } catch(err) {
+        console.error("Error: " + err)
+        return NextResponse.redirect(new URL("/", request.url));
+    }
     
 }

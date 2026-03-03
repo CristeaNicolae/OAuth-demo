@@ -25,7 +25,7 @@ const makeRandomState = (length: number) => {
 export const getGoogleAuthorization = () => {
     const state = makeRandomState(8);
     const scopes = GOOGLE_OAUTH_SCOPES.join(" ");
-    const GOOGLE_OAUTH_CONSENT_SCREEN_URL = `${GOOGLE_OAUTH_URL}?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${GOOGLE_CALLBACK_URL}&access_type=offline&response_type=code&state=${state}&scope=${scopes}`;
+    const GOOGLE_OAUTH_CONSENT_SCREEN_URL = `${GOOGLE_OAUTH_URL}?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${GOOGLE_CALLBACK_URL}&access_type=offline&prompt=consent&response_type=code&state=${state}&scope=${scopes}`;
 
     return {
         state: state,

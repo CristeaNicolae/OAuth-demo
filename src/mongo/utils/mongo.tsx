@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import UserModel from "@/mongo/models/User"
+import { TokenPayload } from "google-auth-library";
+import { AppToken } from '@/types/auth'
 
 declare global {
     var mongoose: any;
@@ -37,9 +39,30 @@ export async function dbConnect() {
 }
 
 export async function findByEmail(email: string) {
-    return UserModel.findOne({email: email});
+  return UserModel.findOne({ email: email });
 }
 
-export async function createNewUser(email: string, password?: string, tokens?: string) {
+export async function findByToken(tokenString: string) {
+  return UserModel.findOne(
+    { "app_token.token": tokenString },
+    { password: 0 }
+  );
+}
 
+export async function createNewOAuthUser(
+    payload: TokenPayload,
+    google_api_refresh_token: string,
+    app_token: AppToken) {
+
+    return UserModel.create({
+        email: payload.email, 
+        given_name: payload.given_name,
+        family_name: payload.family_name,
+        picture_link: payload.picture, 
+        google_api_refresh_token: google_api_refresh_token,
+        app_token: {
+          token: app_token.token,
+          iat: app_token.iat,
+          exp: app_token.exp,
+        }});
 }

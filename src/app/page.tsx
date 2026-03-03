@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { redirect, useRouter } from "next/navigation";
 
 export default function Home() {

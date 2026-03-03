@@ -1,13 +1,12 @@
-import { dbConnect, findByEmail } from "@/mongo/utils/mongo"
+import { dbConnect, findByEmail, createNewOAuthUser } from "@/mongo/utils/mongo"
 import { NextResponse, NextRequest } from "next/server";
-import { state_cookie } from "@/utils/constants"
+import { state_cookie, app_cookie } from "@/utils/constants"
 import { cookies } from 'next/headers';
 import { getIronSession } from 'iron-session';
 import { getGoogleAPIToken } from "@/external/get-api";
-import { SessionData } from "@/types/auth";
-import { verifyIdToken } from "@/utils/token"
-
-// const UserModel = require("@/models/User")
+import { SessionData, AppToken } from "@/types/auth";
+import { verifyIdToken, createToken, isExpired, checkToken } from "@/utils/token";
+import { redirect } from "next/dist/server/api-utils";
 
 export async function GET(request: NextRequest) {
     try {
@@ -39,7 +38,6 @@ export async function GET(request: NextRequest) {
             const apiResponse = await getGoogleAPIToken(code);
             const tokens = await apiResponse.json();
 
-
             if(tokens.error) throw new Error(JSON.stringify(tokens));
 
             const payload = await verifyIdToken(tokens.id_token);
@@ -51,26 +49,41 @@ export async function GET(request: NextRequest) {
 
             (await cookies()).delete(state_cookie);
             
-            
             await dbConnect();
-            const user = await findByEmail(payload.email); 
-            
+            let user = await findByEmail(payload.email); 
+            let app_token: AppToken;
+
+            // account does not exists
             if (!user) {
+                if(!tokens.refresh_token) throw new Error("Missing refresh token when logging in for the first time");
+
+                const appToken: AppToken = createToken();
+                const db_user = await createNewOAuthUser(payload, tokens.refresh_token, appToken);
+                if(!db_user) {
+                    throw new Error("Could not create new user");
+                }
+                user = db_user;
+                app_token = appToken;
 
             }
+            // account exists
+            else {                
+                // token does not exist or is expired or is incomplete
+                if(!checkToken(JSON.stringify(user.app_token))) {
+                        const appToken: AppToken = createToken();
+                        user.app_token = { ...appToken };
+                        user.save();
+                        app_token = appToken;
+                }
+                else {
+                    app_token = user.app_token as AppToken;
+                }
+            }
 
+            //save token to httpOnly cookie
+            (await cookies()).set({name: app_cookie, value: JSON.stringify(app_token), httpOnly: true})
         }
-        
-
-        // const user = await UserModel.findOne({ email });
-
-
-
-        // create token here
-
-        // return NextResponse.json({ message: 'login success', user: user.email }, { status: 200 });
         return NextResponse.redirect(new URL("/home", request.nextUrl.origin));
-
 
     } catch (error) {
         console.error(error);

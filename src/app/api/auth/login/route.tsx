@@ -1,7 +1,6 @@
-import dbConnect from "@/lib/mongo"
+import { dbConnect } from "@/mongo/utils/mongo"
 import { NextResponse } from "next/server";
-
-const UserModel = require("@/models/User")
+import UserModel from "@/mongo/models/User";
 
 export async function POST(request: Request) {
     try {

@@ -1,7 +1,6 @@
-import dbConnect from "@/lib/mongo"
+import { dbConnect } from "@/mongo/utils/mongo"
 import { NextResponse } from "next/server";
-
-const UserModel = require("@/models/User")
+import UserModel from "@/mongo/models/User";
 
 export async function POST(request: Request) {
     try {
@@ -20,7 +19,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ message: 'login success', user: user.email }, { status: 200 });
 
     } catch (error) {
-        console.error('Error trying to login: ', error);
+        console.error('Error trying to register: ', error);
         return NextResponse.json({ status: 500 });
     }
 }
